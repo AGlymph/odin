@@ -1,0 +1,5 @@
+---
+:secret_word: bookstore
+:guesses: aeiou
+:max_rounds: 7
+:current_round: 6
