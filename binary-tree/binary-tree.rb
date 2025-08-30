@@ -22,6 +22,12 @@ class Tree
     @root = build_tree(array)
   end
 
+  def pretty_print(node = @root, prefix = '', is_left = true)
+    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
+    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
+    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
+  end
+
   def build_tree(array)
     return nil if array.empty?
 
@@ -32,6 +38,7 @@ class Tree
 
     return node
   end
+
 
   def insert(node = @root, value)
     return Node.new(value) if node.nil? 
@@ -49,28 +56,64 @@ class Tree
   def delete (node = @root, value)
     return nil if node.nil?
 
-    if value < node.data 
+    if value < node.data
       node.left = delete(node.left, value)
     elsif value > node.data
       node.right = delete(node.right,value)
     else 
-      node.right = node 
-      #todo finish
+      # no children or 1 child
+      # return nil if node.left.nil? && node.right.nil? 
+      # 1 child
+      return node.right if node.left.nil? 
+      return node.left if node.right.nil? 
+      # 2  children 
+      # Get the next biggets node
+      # go right once
+      # go left until nil 
+      # swap data values 
+      # delete the next node
+      next_node = node.right
+      until next_node.left.nil? 
+        next_node = next_node.left
+      end
+      node.data = next_node.data
+      node.right = delete(node.right, next_node.data)
+    end 
+
+    return node
+  end
+
+  def find(node = @root, value)
+    return node if value == node.data 
+
+    if value < node.data 
+      return find(node.left, value)
+    else 
+      return find(node.right,value)
+    end
+  end
+
+  def level_order(&block)
+    return_value = nil
+    unless block_given? 
+      return_value = []
+      block = lambda {|node| return_value << node.data}
+    end
+    
+    queue = [@root]
+    until queue.empty? 
+      queue << queue[0].left unless queue[0].left.nil?
+      queue << queue[0].right unless queue[0].right.nil?
+      block.call(queue.shift)
     end
 
-    return node 
+    return return_value
   end
 
-  def pretty_print(node = @root, prefix = '', is_left = true)
-    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
-    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
-    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
-  end
 
 end
 
-tree = Tree.new([2,4,3,5,6])
+tree = Tree.new([1,2,4,3,5,6,7,8,9])
 tree.pretty_print
-tree.insert(1)
-tree.pretty_print
-
+p tree.level_order {|node| puts node.data}
+p tree.level_order
