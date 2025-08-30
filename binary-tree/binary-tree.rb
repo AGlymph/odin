@@ -84,6 +84,7 @@ class Tree
   end
 
   def find(node = @root, value)
+    return nil if node.nil?
     return node if value == node.data 
 
     if value < node.data 
@@ -110,10 +111,65 @@ class Tree
     return return_value
   end
 
+  def preorder(node = @root, &block)
+    return_value = nil
+    unless block_given? 
+      return_value = []
+      block = lambda {|node| return_value << node.data}
+    end
+
+    return if node.nil?
+    block.call(node)
+    preorder(node.left, &block)
+    preorder(node.right, &block)
+
+    return return_value
+  end
+
+  def inorder(node = @root, &block)
+    return_value = nil
+    unless block_given? 
+      return_value = []
+      block = lambda {|node| return_value << node.data}
+    end
+
+    return if node.nil?
+    inorder(node.left, &block)
+    block.call(node)
+    inorder(node.right, &block)
+
+    return return_value
+  end
+
+  def postorder(node = @root, &block)
+    return_value = nil
+    unless block_given? 
+      return_value = []
+      block = lambda {|node| return_value << node.data}
+    end
+
+    return if node.nil?
+    postorder(node.left, &block)
+    postorder(node.right, &block)
+    block.call(node)
+    return return_value
+  end
+
+  def height(value)
+    node = find(value)
+    return nil if node.nil?
+    get_height(node)
+  end
+
+  def get_height(node)
+    return -1 if node.nil?
+    lheight = get_height(node.left)
+    rheight = get_height(node.right)
+    return [lheight, rheight].max + 1
+  end
 
 end
 
 tree = Tree.new([1,2,4,3,5,6,7,8,9])
 tree.pretty_print
-p tree.level_order {|node| puts node.data}
-p tree.level_order
+p tree.height(2)
