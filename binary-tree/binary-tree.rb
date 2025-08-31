@@ -186,7 +186,6 @@ class Tree
     # get the depth of the left
     # get the depth of the right
     # check if they  are within 1 of each other
-    # balanced_check = Proc.new { |node| return  false if (get_height(node.left) - get_height(node.right)).abs > 1 }
     inorder(node) { |node| return  false if (get_height(node.left) - get_height(node.right)).abs > 1 }
     return true
   end
@@ -197,14 +196,4 @@ class Tree
 
 end
 
-tree = Tree.new([1,2,4,3,5,6,7,8,9])
-tree.pretty_print
-p tree.balanced?
-tree.insert(10)
-tree.insert(15)
-tree.insert(17)
-tree.pretty_print
-p tree.balanced?
-tree.rebalance
-tree.pretty_print
-p tree.balanced?
+
