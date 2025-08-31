@@ -168,8 +168,29 @@ class Tree
     return [lheight, rheight].max + 1
   end
 
+  def depth(node = @root, value)
+    return nil if node.nil?
+    return 0 if value == node.data 
+
+    if value < node.data 
+      edges = depth(node.left, value)
+      return  edges.nil? ? nil : edges + 1
+    else 
+      edges = depth(node.right, value)
+      return  edges.nil? ? nil : edges + 1
+    end
+  end
+
+  def balanced?(node = @root)
+    
+  end
+
 end
 
 tree = Tree.new([1,2,4,3,5,6,7,8,9])
 tree.pretty_print
-p tree.height(2)
+p tree.depth(5)
+p tree.depth(2)
+p tree.depth(3)
+p tree.depth(8)
+p tree.depth(15)
