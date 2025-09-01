@@ -21,7 +21,7 @@ class Board
     until positions_queue.empty?
       current_node = positions_queue.shift
       checked_positions << current_node.position
-      next_positions = get_next(current_node.position)
+      next_positions = get_moveable(current_node.position)
       next_positions.filter! {|pos| !checked_positions.include?(pos)}
 
       next_positions.each do |pos|
@@ -45,7 +45,7 @@ class Board
      path.reverse
   end
 
-  def get_next(postion)
+  def get_moveable(postion)
     next_positions = []
     @next_position_deltas.each do |delta|
       next_position = [postion[0] + delta[0], postion[1] + delta[1]]
