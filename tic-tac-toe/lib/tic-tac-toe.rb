@@ -50,19 +50,28 @@ class TicTacToeGame
     end
   end
 
+  def board_full?
+    !@board.flatten.include?(@placeholder)
+  end
+
+  def game_over?
+    board_full? || !@winner.nil?
+  end
+
+  def do_turn(player)
+    puts "#{player}'s Turn!"
+    get_board_position(player)
+    show_board
+    @winner = winner?(player) ? player : nil
+  end
+
 
   def play
-    while !@is_board_full && !@winner do
-      @players.each do |player|
-        puts "#{player}'s Turn!"
-        get_board_position(player)
-        show_board
-        @is_board_full = !@board.flatten.include?(@placeholder)
-        @winner = winner?(player) ? player : nil
-        if @is_board_full || @winner
-          break
-        end
-      end
+    loop do
+      do_turn(@players[0])
+      break if game_over?
+      do_turn(@players[1])
+      break if game_over?
     end
   end
 
