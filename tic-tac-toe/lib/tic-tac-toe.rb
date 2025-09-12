@@ -34,7 +34,6 @@ class Game
 
   def show_board
     @board.each { |row| puts "#{row[0]}|#{row[1]}|#{row[2]}"}
-    # p @board.transpose
   end
 
   def is_winner?(player)
@@ -83,4 +82,3 @@ end
 game = Game.new
 game.play
 game.show_result
-
