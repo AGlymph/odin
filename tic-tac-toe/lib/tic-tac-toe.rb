@@ -4,12 +4,12 @@
 # X|O|O
 # X: Wins! 
 
-class Game
+class TicTacToeGame
  
-  def initialize
-    @players = ['X','O']
-    @placeholder = ' '
-    @board = Array.new(3){Array.new(3){@placeholder}}
+  def initialize (players: ['X','O'], placeholder: ' ', board: Array.new(3){Array.new(3){placeholder}})
+    @players = players
+    @placeholder = placeholder
+    @board = board
     @winner = nil
     @is_board_full = false
   end
@@ -36,7 +36,7 @@ class Game
     @board.each { |row| puts "#{row[0]}|#{row[1]}|#{row[2]}"}
   end
 
-  def is_winner?(player)
+  def winner?(player)
     if @board.any? {|row| row.uniq.include?(player) && row.uniq.length == 1} # check rows are all the same 
       return true
     elsif @board.transpose.any? {|col| col.uniq.include?(player) && col.uniq.length == 1} # check columns are all the same
@@ -58,7 +58,7 @@ class Game
         get_board_position(player)
         show_board
         @is_board_full = !@board.flatten.include?(@placeholder)
-        @winner = is_winner?(player) ? player : nil
+        @winner = winner?(player) ? player : nil
         if @is_board_full || @winner
           break
         end
@@ -78,7 +78,6 @@ end
 
 
 
-
-game = Game.new
-game.play
-game.show_result
+# game = TicTacToeGame.new()
+# game.play
+# game.show_result
