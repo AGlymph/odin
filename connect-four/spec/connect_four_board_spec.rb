@@ -4,7 +4,7 @@ describe ConnectFourBoard do
   describe "#initialize" do
     rows = 6
     columns = 7
-    subject(:new_board) {described_class.new(columns,rows)}
+    subject(:new_board) {described_class.new(columns: columns,rows: rows)}
     context 'when a board is created' do
       it 'rows is greater than 0' do
         expect(new_board.rows).to be > 0
@@ -22,19 +22,50 @@ describe ConnectFourBoard do
       end
     end
   end
+
+  describe "#insert_piece" do
+    rows = 6
+    columns = 7
+    context 'when the column is not full' do
+        subject(:empty_board) {described_class.new(columns: columns,rows: rows)}
+        it 'the first piece goes into the bottom slot' do 
+          piece = 'x'
+          column = 3  
+          inserted_index = empty_board.insert_piece(column, piece)
+          expect(inserted_index ).to eq(0)
+        end
+
+        it 'the placeholder is replaced with the piece' do 
+          piece = 'x'
+          column = 3  
+          col_index = column - 1
+          inserted_index = empty_board.insert_piece(column, piece)
+          inserted_piece = empty_board.grid[col_index][inserted_index]
+          expect(inserted_piece).to eq(piece)
+        end
+
+        it 'mutltiple pieces stack' do 
+          piece = 'x'
+          column = 3  
+          empty_board.insert_piece(column, piece)
+          empty_board.insert_piece(column, piece)
+          inserted_index = empty_board.insert_piece(column, piece)
+          expect(inserted_index ).to eq(2)
+        end
+    end 
+    context 'when the column is full' do
+       full_grid = [['x','x','x']]
+       subject(:full_board) {described_class.new(columns: columns,rows: rows, grid: full_grid)}
+        it 'the piece is not put into the column' do
+          inserted_index = full_board.insert_piece(1, 'x')
+          expect(inserted_index).to be_nil
+        end
+    end  
+
+  end
   
-
-
-
-
-
-
-
-
-
-
 end
 
-# makes a grid of nodes that is 7x6 
-# 
-# expect it to receive node .new 42 times 
+# user selects col
+# if the col is full it cannot take a piece
+# the piece drops to the first available position 
