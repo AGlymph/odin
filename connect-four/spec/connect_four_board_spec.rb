@@ -61,7 +61,46 @@ describe ConnectFourBoard do
           expect(inserted_index).to be_nil
         end
     end  
+  end
 
+  describe 'chain_length' do 
+    context 'when a piece is touching other matching pieces in a column' do
+      grid = [['x','x','x']]
+      subject(:chain_board) {described_class.new(grid: grid)}
+      it 'returns the length of the number of pieces touching in the col' do
+        longest_chain_length = chain_board.chain_length([1,1], 'x')
+        expect(longest_chain_length).to eq(3)
+      end
+    end
+    context 'when a piece is mixed with other pieces in a column' do
+      grid = [['x','o','o','x']]
+      subject(:chain_board) {described_class.new(grid: grid)}
+      it 'returns the length of the number of pieces touching in the col' do
+        longest_chain_length = chain_board.chain_length([1,3], 'o')
+        expect(longest_chain_length).to eq(2)
+      end
+    end
+    context 'when the longest chain is in the row chain' do
+      grid = [['x','o','o','x'], ['o','o','o','x'], ['o','o','o','o']]
+      subject(:chain_board) {described_class.new(grid: grid)}
+      it 'returns the length of the number of pieces touching in the row for the given position' do
+        longest_chain_length = chain_board.chain_length([1,1], 'x')
+        expect(longest_chain_length).to eq(2)
+      end
+
+       it 'returns the length of the number of pieces touching in the row for the given position and piece' do
+        longest_chain_length = chain_board.chain_length([2,2], 'o')
+        expect(longest_chain_length).to eq(3)
+      end
+    end
+    context 'when the longest chain is in a diagonal' do
+      grid = [['0','o','o','x'], ['o','o','x','0'], ['o','x','o','o']]
+      subject(:chain_board) {described_class.new(grid: grid)}
+      it 'returns the length of the number of pieces touching in the row for the given position' do
+        longest_chain_length = chain_board.chain_length([1,1], 'x')
+        expect(longest_chain_length).to eq(3)
+      end
+    end
   end
   
 end
