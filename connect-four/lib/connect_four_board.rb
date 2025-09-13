@@ -47,7 +47,7 @@ end
 grid = [['0','1','2','x'], ['0','1','x','2'], ['0','x','1','?']]
 board = ConnectFourBoard.new(columns: 6,rows: 7, grid:grid)
 board.show
-board.chain_length([1,1], 'x') # this goes outof bounds and wraprs
+board.chain_length([1,1], 'x') # this goes outof bounds and wraprs.Works when set to 2 2
 # board.insert_piece(2,'x')
 # board.insert_piece(2,'o')
 # board.insert_piece(2,'y')
