@@ -1,8 +1,9 @@
 class ConnectFourNode
-  attr_accessor :piece, :edges
+  attr_accessor :piece, :relationships, :position
 
-  def initialize
+  def initialize (postion = nil)
+    @position = postion
     @piece = nil
-    @edges = Array.new(8)
+    @relationships = Array.new(8)
   end
 end
