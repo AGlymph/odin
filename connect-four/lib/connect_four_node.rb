@@ -6,4 +6,4 @@ class ConnectFourNode
     @piece = nil
     @relationships = Array.new(8)
   end
-end
+end 

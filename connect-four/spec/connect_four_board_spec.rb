@@ -63,7 +63,7 @@ describe ConnectFourBoard do
     end  
   end
 
-  describe 'chain_length' do 
+  describe '#chain_length' do 
     context 'when a piece is touching other matching pieces in a column' do
       grid = [['x','x','x']]
       subject(:chain_board) {described_class.new(grid: grid)}

@@ -10,7 +10,7 @@ class ConnectFourBoard
 
   def show 
     puts "---"
-    flipped_grid = @grid.map {|col| col.reverse}
+    flipped_grid = @grid.map {|col| col.reverse} 
     flipped_grid.transpose.each_with_index {|row, index| puts "#{index  + 1}: | #{row.join(' | ')} |"}
     puts "---"
   end
@@ -24,31 +24,37 @@ class ConnectFourBoard
   end
 
   def chain_length(position, piece)
-    flipped_grid = @grid.map {|col| col.reverse}
+    flipped_grid = @grid.map {|col| col.reverse} # indexes are opposite of a how a connect four board is viewed. 
     col_index = position[0] - 1
     row_index = position[1] - 1
-    column = flipped_grid[col_index]
+    column = flipped_grid[col_index] 
     column_string = column.join
     row = flipped_grid.transpose[row_index]
     row_string = row.join
 
-    
+    max_column_index = @grid.length - 1
+    max_row_index = @grid[0].length - 1 
 
-    left_right_diagonal = [flipped_grid[col_index-1][row_index-1], flipped_grid[col_index][row_index], flipped_grid[col_index+1][row_index+1]]
-    p left_right_diagonal
+    left_right_position_deltas = [[-3,-3],[-2,-2],[-1,-1],[0,0],[1,1],[2,2],[3,3]]
+    left_right_diagonal_string = ""
+    left_right_position_deltas.each do |delta|
+      diagonal_col_index = col_index + delta[0]
+      diagonal_row_index  = row_index + delta[1]
+      left_right_diagonal_string += flipped_grid[diagonal_col_index][diagonal_row_index] if diagonal_col_index.between?(0, max_column_index) && diagonal_row_index.between?(0, max_row_index)
+    end
+
+    right_left_poistion_deltas = [[-3,3],[-2,2],[-1,1],[0,0],[1,-1],[2,-2],[3,-3]]
+    right_left_diagonal_string = ""
+    right_left_poistion_deltas.each do |delta|
+      diagonal_col_index = col_index + delta[0]
+      diagonal_row_index  = row_index + delta[1]
+      right_left_diagonal_string += flipped_grid[diagonal_col_index][diagonal_row_index] if diagonal_col_index.between?(0, max_column_index) && diagonal_row_index.between?(0, max_row_index)
+    end
+
     4.downto(1) do |n|
       check_chain = piece*n
-      return n if (column_string.include?(check_chain) || row_string.include?(check_chain))
+      return n if (column_string.include?(check_chain) || row_string.include?(check_chain) || left_right_diagonal_string.include?(check_chain) || right_left_diagonal_string.include?(check_chain))
     end
     return 0
   end
 end
-
-grid = [['0','1','2','x'], ['0','1','x','2'], ['0','x','1','?']]
-board = ConnectFourBoard.new(columns: 6,rows: 7, grid:grid)
-board.show
-board.chain_length([1,1], 'x') # this goes outof bounds and wraprs.Works when set to 2 2
-# board.insert_piece(2,'x')
-# board.insert_piece(2,'o')
-# board.insert_piece(2,'y')
-# board.show
