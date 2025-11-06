@@ -1,27 +1,61 @@
 require_relative 'connect_four_board'
 
 class ConnectFour 
+
+  def initialize (players: ['X','O'], board: ConnectFourBoard.new())
+    @players = players
+    @board = board 
+    @winner = nil 
+  end
+
+  def game_over?
+    @board.full? || !@winner.nil?
+  end
+
+  def do_turn(player)
+      inserted_index = nil 
+      puts "#{player}'s Turn!"
+      while inserted_index.nil? do 
+        puts "Select a column: "
+        column = gets.chomp.slice(0).to_i
+        if column.between?(1, @board.columns)
+          inserted_index = @board.insert_piece(column, player)
+        end 
+      end 
+
+      position = [column, inserted_index + 1]
+      chain_length = @board.chain_length(position, player)
+      p "Chain lenght #{chain_length}"
+      if chain_length == 4 
+        @winner = player 
+      end
+  end
+
+
+ def show_result
+   if @winner
+     puts "#{@winner} won!"
+   else
+    puts "Draw!"
+   end
+ end
+
   
-  grid = [['0','1','2','x'], ['0','1','x','2'], ['0','x','1','?']]
-  board = ConnectFourBoard.new(columns: 6,rows: 7, grid:grid)
-  board.show
-  board.chain_length([1,1], 'x') # this goes outof bounds and wraprs.Works when set to 2 2
-  # board.insert_piece(2,'x')
-  # board.insert_piece(2,'o')
-  # board.insert_piece(2,'y')
-  # board.show
+ def play
+   puts "//LET'S PLAY CONNECT 4//"
+    @board.show
+    loop do
+      do_turn(@players[0])
+      @board.show
+      break if game_over?
+      do_turn(@players[1])
+      @board.show
+      break if game_over?
+    end
+    show_result
+ end
+
 end
 
 game = ConnectFour.new();
-# have a grid 7long by 6 tall
-# two players @ and # 
-# each player takes a turn to sellect a column 
-# the piece drops down to the last available slot 
-# player wins they connec four in a row: horizontally, diagonally, or vertically 
-# 
-#
-# graph 
-# each slot is a node
-# each node can hold one piece
-# each node has an edge to their adjacent nodes
-# 
+game.play();

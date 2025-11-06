@@ -63,6 +63,26 @@ describe ConnectFourBoard do
     end  
   end
 
+  describe '#full?' do
+    context 'when the board has positions without a piece'  do
+      empty_space = ' '
+      grid = [['x',empty_space,'o','x'], [empty_space,'o','o','x'], [empty_space,'o','o','o']]
+      subject(:empty_board) {described_class.new(placeholder: empty_space, grid: grid)}
+      it 'returns false' do
+        expect(empty_board.full?).to be false
+      end
+    end
+    context 'when the board has all positions with a piece'  do
+      empty_space = ' '
+      grid = [['x','x','o','x'], ['x','o','o','x'], ['x','o','o','o']]
+      subject(:full_board) {described_class.new(placeholder: empty_space, grid: grid)}
+      it 'returns false' do
+        expect(full_board.full?).to be true
+      end
+    end
+
+  end
+
   describe '#chain_length' do 
     context 'when a piece is touching other matching pieces in a column' do
       grid = [['x','x','x']]
