@@ -13,19 +13,18 @@ class ConnectFour
   end
 
   def do_turn(player)
-      inserted_index = nil 
+      inserted_row = nil 
       puts "#{player}'s Turn!"
-      while inserted_index.nil? do 
+      while inserted_row.nil? do 
         puts "Select a column: "
         column = gets.chomp.slice(0).to_i
         if column.between?(1, @board.columns)
-          inserted_index = @board.insert_piece(column, player)
+          inserted_row = @board.insert_piece(column, player)
         end 
       end 
 
-      position = [column, inserted_index + 1]
+      position = [column, inserted_row]
       chain_length = @board.chain_length(position, player)
-      p "Chain lenght #{chain_length}"
       if chain_length == 4 
         @winner = player 
       end

@@ -20,8 +20,10 @@ class ConnectFourBoard
     first_empty_index = @grid[col_index].index(@placeholder)
     return nil if first_empty_index.nil?
     @grid[col_index][first_empty_index] = piece
+    placed_row = @rows - first_empty_index
+   #@grid[col_index].reverse.index(piece)
 
-    return first_empty_index #TODO Make insert piece return a position, not index. 
+    return placed_row # first_empty_index #TODO Make insert piece return a position, not index. 
   end
 
   def full?
@@ -30,8 +32,8 @@ class ConnectFourBoard
   end
 
   def chain_length(position, piece)
+    p position
     flipped_grid = @grid.map {|col| col.reverse} # indexes are opposite of a how a connect four board is viewed. 
-    p position # TODO FLIP position. 1,6 comes in as 1,1 . 
     col_index = position[0] - 1
     row_index = position[1] - 1
     column = flipped_grid[col_index] 
@@ -57,11 +59,6 @@ class ConnectFourBoard
       diagonal_row_index  = row_index + delta[1]
       right_left_diagonal_string += flipped_grid[diagonal_col_index][diagonal_row_index] if diagonal_col_index.between?(0, max_column_index) && diagonal_row_index.between?(0, max_row_index)
     end
-
-    p column_string
-    p row_string
-    p left_right_diagonal_string
-    p right_left_diagonal_string
 
     4.downto(1) do |n|
       check_chain = piece*n

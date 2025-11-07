@@ -31,15 +31,16 @@ describe ConnectFourBoard do
         it 'the first piece goes into the bottom slot' do 
           piece = 'x'
           column = 3  
-          inserted_index = empty_board.insert_piece(column, piece)
-          expect(inserted_index ).to eq(0)
+          inserted_row = empty_board.insert_piece(column, piece)
+          expect(inserted_row).to eq(rows)
         end
 
         it 'the placeholder is replaced with the piece' do 
           piece = 'x'
           column = 3  
           col_index = column - 1
-          inserted_index = empty_board.insert_piece(column, piece)
+          inserted_row = empty_board.insert_piece(column, piece)
+          inserted_index = rows - inserted_row
           inserted_piece = empty_board.grid[col_index][inserted_index]
           expect(inserted_piece).to eq(piece)
         end
@@ -49,16 +50,16 @@ describe ConnectFourBoard do
           column = 3  
           empty_board.insert_piece(column, piece)
           empty_board.insert_piece(column, piece)
-          inserted_index = empty_board.insert_piece(column, piece)
-          expect(inserted_index ).to eq(2)
+          inserted_row = empty_board.insert_piece(column, piece)
+          expect(inserted_row).to eq(4)
         end
     end 
     context 'when the column is full' do
        full_grid = [['x','x','x']]
        subject(:full_board) {described_class.new(columns: columns,rows: rows, grid: full_grid)}
         it 'the piece is not put into the column' do
-          inserted_index = full_board.insert_piece(1, 'x')
-          expect(inserted_index).to be_nil
+          inserted_row = full_board.insert_piece(1, 'x')
+          expect(inserted_row).to be_nil
         end
     end  
   end
