@@ -21,9 +21,7 @@ class ConnectFourBoard
     return nil if first_empty_index.nil?
     @grid[col_index][first_empty_index] = piece
     placed_row = @rows - first_empty_index
-   #@grid[col_index].reverse.index(piece)
-
-    return placed_row # first_empty_index #TODO Make insert piece return a position, not index. 
+    return placed_row 
   end
 
   def full?
@@ -32,7 +30,6 @@ class ConnectFourBoard
   end
 
   def chain_length(position, piece)
-    p position
     flipped_grid = @grid.map {|col| col.reverse} # indexes are opposite of a how a connect four board is viewed. 
     col_index = position[0] - 1
     row_index = position[1] - 1
