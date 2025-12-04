@@ -1,4 +1,5 @@
-# The board given a FEN string, will update the all pieces and positions to that string
+# The board given a FEN string, will update the all pieces and positions to that string 
+
 
 # The board given a FEN string, will update the state (castling, round counter) to that of the string 
 # # The board can share a FEN of the current board state
