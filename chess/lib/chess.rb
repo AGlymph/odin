@@ -4,32 +4,77 @@ require_relative 'player'
 
 
 class Chess
-  def initialize (board: Board.new())
-    @board = board
-    @players =  [Player.new(:white), Player.new(:black)]  
-    @players.each do |player| 
+  def initialize ()
+    @board = nil
+    @players = {white: [], black: []}
+    @current_turn = :white
+    load_fen()
+    @board.update_all_piece_moves
+=begin    
+ # @players =  [Player.new(:white), Player.new(:black)]  
+ @players.each do |player| 
        starting_positions = @board.columns.map {|c| c + player.starting_row} 
        starting_positions.push(*@board.columns.map {|c| c + player.starting_row.next})
        @board.place_many(player.pieces, starting_positions)
-    end 
-    @board.update_all_piece_moves
+    end  
+=end
   end
 
-  def get_turn 
-    
+  def load_fen(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkqOTHERINFO")
+    fen_arr= fen_string.split(' ')
+   
+    row_arr = fen_arr[0].split('/').reverse
+    @current_turn = fen_arr[1] == 'w' ? :white : :black
+
+    board_grid = []
+    row_arr.each do |r|
+      row = []
+      r.each_char do |c|
+        if /[rnbqkbnrp]/.match?(c)
+          color = :black
+          piece = Piece.new(c, color)
+          @players[color] << piece
+          row << piece
+        elsif /[RNBQKBNRP]/.match?(c)
+          color = :white
+          piece = Piece.new(c, color)
+          @players[color] << piece
+          row << piece
+        elsif /[0-9]/.match?(c)
+          c.to_i.times do 
+            row << []
+          end
+        else 
+          p c
+        end
+      end
+      board_grid << row
+    end
+    @board = Board.new(grid: board_grid)
+  end
+
+  def do_turn(player)
+    move = nil 
+    loop do 
+      puts "Enter two squares: ex: a1b3"
+      move = gets.chomp.gsub(' ', '').slice(0,4).downcase
+      valid_input = /^[a-h][1-9][a-h][1-9]$/.match?(move) 
+      succesful_move =  @board.do(move) if valid_input 
+      break if succesful_move
+    end
   end
 
   def play
-    # puts "//LET'S PLAY CHESS!//"
+    puts "//LET'S PLAY CHESS!//"
     @board.show
-    # loop do
-     # do_turn(@players[0])
-      # @board.show
-      # break if game_over?
-      # do_turn(@players[1])
-      # @board.show
-      # break if game_over?
-    # end
+    loop do 
+       do_turn(@players[@current_turn])
+       @board.show
+       # break if game_over?
+       @board.update_all_piece_moves
+       @current_turn = @current_turn == :white ? :black : :white
+       break
+    end
     #show_result
   end
 end

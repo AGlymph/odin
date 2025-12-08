@@ -1,9 +1,9 @@
 class Board
   attr_reader :columns
-  def initialize (placeholder: ' ')
+  def initialize (grid: Array.new(8){Array.new(8){}}, placeholder: ' ')
     @placeholder = placeholder
     @columns = ['a','b','c','d','e','f','g','h']
-    @grid = Array.new(8){Array.new(8){}}
+    @grid = grid
   end
 
   def chess_notation_to_index(position)
@@ -13,6 +13,32 @@ class Board
 
   def index_to_chess_notation(position)
     return "#{@columns[position[1]]}#{position[0]+1}"
+  end
+
+  def do(move_string)
+    # TO DO CASTLING
+    start_position_index = chess_notation_to_index(move_string.slice(0,2))
+    end_position_index = chess_notation_to_index(move_string.slice(2,2))
+    start_position = @grid[start_position_index[0]][start_position_index[1]]  
+    end_position = @grid[end_position_index[0]][end_position_index[1]]  
+    if start_position.is_a?(Piece)
+       piece = start_position
+       if piece.moves.include?(end_position_index)
+         puts "doing move"
+         place(piece, end_position_index)
+         clear(start_position_index)
+         if end_position.is_a?(Piece)
+           puts "captured! TO DO capturing stuff"
+         end
+         return true
+       else
+         puts "piece can't make that move"
+       end
+    else 
+      puts "Square is empty"
+    end
+
+    return false 
   end
 
   def place_many(pieces, positions)

@@ -1,6 +1,6 @@
 # movement vector or movement rules module that is read on initilization and saved to the pice. At init get block of movement rules? A piece has a movement vector 
 class Piece
-  attr_reader :visual
+  attr_reader :visual, :moves
   def initialize (name, team, visual = nil)
     @name = name
     @team =  team
@@ -16,5 +16,9 @@ class Piece
       moves << move_position if move_position[0].between?(0,7) && move_position[1].between?(0,7)
     end
      @moves = moves
+  end
+
+  def can_move?(position)
+    @movement_vectors.include?
   end
 end
