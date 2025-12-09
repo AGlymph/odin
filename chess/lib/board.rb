@@ -20,27 +20,28 @@ class Board
   end
 
   def do(move_string)
-    # TO DO CASTLING
-    start_position_coordinates = chess_notation_to_coordinates(move_string.slice(0,2))
-    end_position_coordinates = chess_notation_to_coordinates(move_string.slice(2,2))
-    start_position = @grid[start_position_coordinates[0]][start_position_coordinates[1]]  
-    end_position = @grid[end_position_coordinates[0]][end_position_coordinates[1]]  
-    if start_position.is_a?(Piece)
-       piece = start_position
-       if piece.can_move?(end_position_coordinates)
-         puts "doing move"
-         place(piece, end_position_coordinates)
-         clear(start_position_coordinates)
-         if end_position.is_a?(Piece)
-           puts "captured! TO DO capturing stuff"
-         end
-         return true
-       else
-         puts "piece can't make that move"
-       end
+    start_coordinates = chess_notation_to_coordinates(move_string.slice(0,2))
+    end_coordinates = chess_notation_to_coordinates(move_string.slice(2,2))
+    piece = @grid[start_coordinates[0]][start_coordinates[1]]  
+    end_position = @grid[end_coordinates[0]][end_coordinates[1]]  
+   
+    if piece.is_a?(Piece)
+      move = piece.get_move(end_coordinates) 
+      if !move.nil?
+        action = move[:action]
+        puts "moving"
+        if action.nil? || action == :capture
+          place(piece, end_coordinates)
+          clear(start_coordinates)
+          return true 
+        end
+      else 
+        puts "piece can't make that move"
+      end
     else 
       puts "Square is empty"
     end
+
     return false 
   end
 

@@ -9,7 +9,7 @@ class Chess
     @board = nil
     @players = {white: [], black: []}
     @current_turn = :white
-    load_fen()
+    load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b")
     @board.update_all_piece_moves
 
   end
@@ -68,7 +68,6 @@ class Chess
        # break if game_over?
        @board.update_all_piece_moves
        @current_turn = @current_turn == :white ? :black : :white
-       break
     end
     #show_result
   end
