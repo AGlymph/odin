@@ -4,40 +4,35 @@ require_relative 'player'
 
 
 class Chess
+  PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
   def initialize ()
     @board = nil
     @players = {white: [], black: []}
     @current_turn = :white
     load_fen()
     @board.update_all_piece_moves
-=begin    
- # @players =  [Player.new(:white), Player.new(:black)]  
- @players.each do |player| 
-       starting_positions = @board.columns.map {|c| c + player.starting_row} 
-       starting_positions.push(*@board.columns.map {|c| c + player.starting_row.next})
-       @board.place_many(player.pieces, starting_positions)
-    end  
-=end
+
   end
 
   def load_fen(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkqOTHERINFO")
     fen_arr= fen_string.split(' ')
-   
     row_arr = fen_arr[0].split('/').reverse
     @current_turn = fen_arr[1] == 'w' ? :white : :black
-
+    @board = Board.new()
     board_grid = []
     row_arr.each do |r|
       row = []
       r.each_char do |c|
         if /[rnbqkbnrp]/.match?(c)
           color = :black
-          piece = Piece.new(c, color)
+          name = PIECE_NAMES[c]
+          piece = Piece.new(name, color, c, @board)
           @players[color] << piece
           row << piece
         elsif /[RNBQKBNRP]/.match?(c)
           color = :white
-          piece = Piece.new(c, color)
+          name = PIECE_NAMES[c.downcase]
+          piece = Piece.new(name, color, c, @board)
           @players[color] << piece
           row << piece
         elsif /[0-9]/.match?(c)
@@ -50,7 +45,7 @@ class Chess
       end
       board_grid << row
     end
-    @board = Board.new(grid: board_grid)
+    @board.set_grid_to(board_grid)
   end
 
   def do_turn(player)

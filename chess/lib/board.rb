@@ -6,6 +6,10 @@ class Board
     @grid = grid
   end
 
+  def set_grid_to(array)
+    @grid = array
+  end
+
   def chess_notation_to_coordinates(position)
     position_string = position.split('')
     return [position_string[1].to_i-1, @columns.index(position_string[0])]
@@ -41,7 +45,6 @@ class Board
   end
 
 
-
   def place_many(pieces, positions)
     raise TypeError unless pieces.is_a?(Array) && positions.is_a?(Array)
     pieces.each_with_index do |piece, i|
@@ -62,7 +65,7 @@ class Board
   def update_all_piece_moves()
      @grid.each_with_index do |row, index0|
        row.each_with_index do |piece, index1|
-          piece.update_moves([index0,index1], self) if piece.is_a?(Piece)
+          piece.update_moves([index0,index1]) if piece.is_a?(Piece)
        end 
      end
   end
