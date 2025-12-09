@@ -1,24 +1,49 @@
 # movement vector or movement rules module that is read on initilization and saved to the pice. At init get block of movement rules? A piece has a movement vector 
 class Piece
-  attr_reader :visual, :moves
+  attr_reader :visual, :moves, :move_pattern
   def initialize (name, team, visual = nil)
     @name = name
     @team =  team
     @visual = name
-    @movement_vectors =  [[2,1],[1,2],[-1,2],[-2,1],[-2,-1],[-1,-2],[1,-2],[2,-1]]
-    @moves = nil
+    @moves = []
+    @move_pattern = MOVE_PATTERNS['k']
   end
 
-  def update_moves(current_position, grid)
-     moves = []
-     @movement_vectors.each do |vector|
+  MOVE_PATTERNS = {
+    'k'=> -> (current_position, board){
+      moves = []
+      x,y = current_position
+      movement_deltas=  [[2,1],[1,2],[-1,2],[-2,1],[-2,-1],[-1,-2],[1,-2],[2,-1]]
+      target_pos  = movement_deltas.filter_map {|dx, dy| 
+        new_pos = [x + dx, y + dy]
+        new_pos if new_pos.all? { |coord| coord.between?(0,7)}
+      }
+      target_pos.each do |pos|
+        x,y = pos
+        move = {position: pos}
+        square = board.grid[x][y]
+        if square.is_a?(Piece)
+          move[:action] = :capture
+        else
+          move[:action] = nil
+        end
+        moves << move
+      end
+      return moves
+    } 
+  }
+
+  def update_moves(current_position, board)
+     @moves = @move_pattern.call(current_position, board)
+=begin @movement_vectors.each do |vector|
       move_position = [current_position[0] + vector[0], current_position[1] + vector[1]]
       moves << move_position if move_position[0].between?(0,7) && move_position[1].between?(0,7)
     end
      @moves = moves
+=end
   end
 
   def can_move?(position)
-    @movement_vectors.include?
+    @moves.any? { |move|  move[:position] == position }
   end
 end

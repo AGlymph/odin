@@ -1,12 +1,12 @@
 class Board
-  attr_reader :columns
+  attr_reader :columns, :grid
   def initialize (grid: Array.new(8){Array.new(8){}}, placeholder: ' ')
     @placeholder = placeholder
     @columns = ['a','b','c','d','e','f','g','h']
     @grid = grid
   end
 
-  def chess_notation_to_index(position)
+  def chess_notation_to_coordinates(position)
     position_string = position.split('')
     return [position_string[1].to_i-1, @columns.index(position_string[0])]
   end
@@ -17,16 +17,16 @@ class Board
 
   def do(move_string)
     # TO DO CASTLING
-    start_position_index = chess_notation_to_index(move_string.slice(0,2))
-    end_position_index = chess_notation_to_index(move_string.slice(2,2))
-    start_position = @grid[start_position_index[0]][start_position_index[1]]  
-    end_position = @grid[end_position_index[0]][end_position_index[1]]  
+    start_position_coordinates = chess_notation_to_coordinates(move_string.slice(0,2))
+    end_position_coordinates = chess_notation_to_coordinates(move_string.slice(2,2))
+    start_position = @grid[start_position_coordinates[0]][start_position_coordinates[1]]  
+    end_position = @grid[end_position_coordinates[0]][end_position_coordinates[1]]  
     if start_position.is_a?(Piece)
        piece = start_position
-       if piece.moves.include?(end_position_index)
+       if piece.can_move?(end_position_coordinates)
          puts "doing move"
-         place(piece, end_position_index)
-         clear(start_position_index)
+         place(piece, end_position_coordinates)
+         clear(start_position_coordinates)
          if end_position.is_a?(Piece)
            puts "captured! TO DO capturing stuff"
          end
@@ -37,9 +37,10 @@ class Board
     else 
       puts "Square is empty"
     end
-
     return false 
   end
+
+
 
   def place_many(pieces, positions)
     raise TypeError unless pieces.is_a?(Array) && positions.is_a?(Array)
@@ -49,19 +50,19 @@ class Board
   end
 
   def place(piece, position)
-    position = chess_notation_to_index(position) if position.is_a?(String)
+    position = chess_notation_to_coordinates(position) if position.is_a?(String)
     @grid[position[0]][position[1]] = piece
   end
 
   def clear(position)
-    position = chess_notation_to_index(position) if position.is_a?(String)
+    position = chess_notation_to_coordinates(position) if position.is_a?(String)
     @grid[position[0]][position[1]] = nil 
   end
 
   def update_all_piece_moves()
      @grid.each_with_index do |row, index0|
        row.each_with_index do |piece, index1|
-          piece.update_moves([index0,index1], @grid) if piece.is_a?(Piece)
+          piece.update_moves([index0,index1], self) if piece.is_a?(Piece)
        end 
      end
   end
