@@ -19,9 +19,11 @@ class Piece
 
     if team == :white
       @PAWN_START_ROW = 1
+      @PAWN_PROMOTION_ROW = 6
       @DIRECTION = 1
     else 
       @PAWN_START_ROW = 6
+      @PAWN_PROMOTION_ROW = 1
       @DIRECTION = -1 
     end
   end
@@ -45,7 +47,7 @@ class Piece
       return :hit
     else
       return if type == :capture_only
-      @moves << {position: end_coordinates, action: nil}
+      @moves << (@name == 'pawn' && x = @PAWN_PROMOTION_ROW ? {position: end_coordinates, action: :promotion}  : {position: end_coordinates, action: nil})
       return :empty
     end
   end
