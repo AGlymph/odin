@@ -1,7 +1,7 @@
 # movement vector or movement rules module that is read on initilization and saved to the pice. At init get block of movement rules? A piece has a movement vector 
 class Piece
   attr_accessor :current_position
-  attr_reader :visual, :moves, :team
+  attr_reader :visual, :moves, :team, :name
   attr_writer :board
 
   def initialize (name, team, visual = nil, board = nil)
@@ -30,137 +30,93 @@ class Piece
     position.all? { |coord| coord.between?(0,7)}
   end
 
-  def pawn_moves ()
-    moves = []
-    x,y = @current_position    
+  def check_and_append_move (delta, type = :all)
+    x,y = @current_position     
+    end_coordinates =  [x + delta[0], y + delta[1]]
+
+    return if !in_bounds?(end_coordinates)
+    ex,ey = end_coordinates
+    target_square = @board.grid[ex][ey]
+
+    if target_square.is_a?(Piece) 
+      return if target_square.team == @team
+      return if type == :move_only
+      @moves << (target_square.name == 'king' ? {position: end_coordinates, action: :check} : {position: end_coordinates, action: :capture})
+      return :hit
+    else
+      return if type == :capture_only
+      @moves << {position: end_coordinates, action: nil}
+      return :empty
+    end
+  end
+
+  def pawn_moves () 
     #ADD PROMOTION
-    target = [x+(2*@DIRECTION),y]
-    tx,ty = target
-    moves << {position: target, action: nil} if x == @PAWN_START_ROW && !@board.grid[tx][ty].is_a?(Piece)
-    target = [x+1*@DIRECTION,y]
-    tx,ty = target
-    moves << {position: target, action: nil} if in_bounds?(target) && !@board.grid[tx][ty].is_a?(Piece)
-
-    target = [x+1*@DIRECTION,y+1]
-    tx,ty = target
-    moves << {position: target, action: :capture} if in_bounds?(target) && @board.grid[tx][ty].is_a?(Piece) && @board.grid[tx][ty].team != @team
-
-    target = [x+1*@DIRECTION,y-1]
-    tx,ty = target
-    moves << {position: target, action: :capture} if in_bounds?(target) && @board.grid[tx][ty].is_a?(Piece) && @board.grid[tx][ty].team != @team
-    return moves
+    check_and_append_move([2*@DIRECTION,0], :move_only) if @current_position[0] == @PAWN_START_ROW 
+    check_and_append_move([1*@DIRECTION,0], :move_only)
+    check_and_append_move([1*@DIRECTION,1], :capture_only)
+    check_and_append_move([1*@DIRECTION,-1], :capture_only)
   end
 
   def rook_moves ()
-    moves = []
-    x,y = @current_position
-    #castling goes here
-    
-    up = 7 - x
-    down = x
-    right = 7 - y
-    left = y 
-
-    (1..up).each do |i|
-      target = [x+i,y]
-      tx,ty = target
-      if in_bounds?(target)
-        if !@board.grid[tx][ty].is_a?(Piece)
-          moves << {position: target, action: nil}
-        elsif @board.grid[tx][ty].is_a?(Piece) && @board.grid[tx][ty].team != @team
-          moves << {position: target, action: :capture}
-          break
-        else
-          break 
-        end
-      end
+    #ADD CASTLING?
+    (1..7).each do |i| #up 
+      move = check_and_append_move([i,0])
+      break if move.nil? || move == :hit
     end
-
-    (1..down).each do |i|
-      target = [x-i,y]
-      tx,ty = target
-      if in_bounds?(target)
-        if !@board.grid[tx][ty].is_a?(Piece)
-          moves << {position: target, action: nil}
-        elsif @board.grid[tx][ty].is_a?(Piece) && @board.grid[tx][ty].team != @team
-          moves << {position: target, action: :capture}
-          break
-        else
-          break 
-        end
-      end
+    (1..7).each do |i| #down
+      move = check_and_append_move([-i,0])
+      break if move.nil? || move == :hit
     end
-
-    (1..right).each do |i|
-      target = [x,y+i]
-      tx,ty = target
-      if in_bounds?(target)
-        if !@board.grid[tx][ty].is_a?(Piece)
-          moves << {position: target, action: nil}
-        elsif @board.grid[tx][ty].is_a?(Piece) && @board.grid[tx][ty].team != @team
-          moves << {position: target, action: :capture}
-          break
-        else
-          break 
-        end
-      end
+    (1..7).each do |i| #right
+       move = check_and_append_move([0,+i])
+      break if move.nil? || move == :hit
     end
-
-    (1..left).each do |i|
-      target = [x,y-i]
-      tx,ty = target
-      if in_bounds?(target)
-        if !@board.grid[tx][ty].is_a?(Piece)
-          moves << {position: target, action: nil}
-        elsif @board.grid[tx][ty].is_a?(Piece) && @board.grid[tx][ty].team != @team
-          moves << {position: target, action: :capture}
-          break
-        else
-          break 
-        end
-      end
+    (1..7).each do |i| #left
+      move = check_and_append_move([0,-i])
+      break if move.nil? || move == :hit
     end
-
-    return moves
   end
 
   def knight_moves ()
-      moves = []
-      x,y = @current_position
-      movement_deltas =  [[2,1],[1,2],[-1,2],[-2,1],[-2,-1],[-1,-2],[1,-2],[2,-1]]
-      target_pos  = movement_deltas.filter_map {|dx, dy| 
-        new_pos = [x + dx, y + dy]
-        new_pos if in_bounds?(new_pos)
-      }
-      target_pos.each do |pos|
-        x,y = pos
-        move = {position: pos}
-        square = @board.grid[x][y]
-        if square.is_a?(Piece)
-          move[:action] = :capture
-        else
-          move[:action] = nil
-        end
-        moves << move
-      end
-      return moves
+      [[2,1],[1,2],[-1,2],[-2,1],[-2,-1],[-1,-2],[1,-2],[2,-1]].each {|delta| check_and_append_move(delta)}
   end
 
   def bishop_moves ()
-    []
+    (1..7).each do |i| #up&right
+      move = check_and_append_move([i,i])
+      break if move.nil? || move == :hit
+    end
+    (1..7).each do |i| #up&left
+      move = check_and_append_move([i,-i])
+      break if move.nil? || move == :hit
+    end
+    (1..7).each do |i| #down&right
+      move = check_and_append_move([-i,i])
+      break if move.nil? || move == :hit
+    end
+    (1..7).each do |i| #down&left
+      move = check_and_append_move([-i,-i])
+      break if move.nil? || move == :hit
+    end
   end
 
   def queen_moves ()
-    []
+    rook_moves()
+    bishop_moves()
   end
 
   def king_moves ()
-    []
+    #castling?
+    #when in check
+    [[1,-1],[1,0],[1,1],[0,-1],[0,1],[-1,-1],[-1,0],[-1,1]].each {|delta| check_and_append_move(delta)}
   end
 
   def update_moves(current_position)
     @current_position = current_position
-    @moves = send("#{@name.downcase}_moves") 
+    @moves = []
+    send("#{@name.downcase}_moves") 
+    @moves.compact!
   end
 
   def get_move(position)
