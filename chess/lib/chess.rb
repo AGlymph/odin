@@ -2,18 +2,33 @@ require_relative 'board'
 require_relative 'piece'
 require_relative 'player'
 
-
+#TDODO CASTLING, PROMOTION, CHECK STATE, CHECK MATE STATE, SAVING
 class Chess
   PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
   def initialize ()
     @board = nil
-    @players = {white: [], black: []}
+    @players = {white: Player.new(:white), black: Player.new(:black)}
     @current_turn = :white
-    load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b")
-    @board.update_all_piece_moves
+    setup_game("1k7/2ppp3/8/3K4/8/8/8/8 b")
+    update_all_moves()
   end
 
-  def load_fen(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkqOTHERINFO")
+  def update_all_moves()
+    @players[:white].update_moves()
+    @players[:black].update_moves()
+    @players[:white].update_king_moves(@players[:black].check_positions)
+    @players[:black].update_king_moves(@players[:white].check_positions)
+  end
+
+  def spawn_piece(piece_symbol, team)
+    name = PIECE_NAMES[piece_symbol.downcase]
+    piece = Piece.new(name, team, piece_symbol, @board)
+    @players[team].pieces << piece
+    @players[team].king = piece if name == 'king'
+    return piece 
+  end
+
+  def setup_game(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkqOTHERINFO")
     fen_arr= fen_string.split(' ')
     row_arr = fen_arr[0].split('/').reverse
     @current_turn = fen_arr[1] == 'w' ? :white : :black
@@ -23,23 +38,15 @@ class Chess
       row = []
       r.each_char do |c|
         if /[rnbqkbnrp]/.match?(c)
-          color = :black
-          name = PIECE_NAMES[c]
-          piece = Piece.new(name, color, c, @board)
-          @players[color] << piece
-          row << piece
+          row << spawn_piece(c, :black)
         elsif /[RNBQKBNRP]/.match?(c)
-          color = :white
-          name = PIECE_NAMES[c.downcase]
-          piece = Piece.new(name, color, c, @board)
-          @players[color] << piece
-          row << piece
+          row << spawn_piece(c, :white)
         elsif /[0-9]/.match?(c)
           c.to_i.times do 
             row << []
           end
         else 
-          p c
+          p "error #{c}"
         end
       end
       board_grid << row
@@ -63,17 +70,18 @@ class Chess
     end
   end
 
+
   def play
     puts "//LET'S PLAY CHESS!//"
     @board.show
     loop do 
-       #do_turn(@players[@current_turn])
-       # @board.show
+       do_turn(@players[@current_turn])
+       @board.show
        # break if game_over?
+       update_all_moves()
        # @board.update_all_piece_moves
        # update players
        # update states 
-       break 
        @current_turn = @current_turn == :white ? :black : :white
     end
     #show_result
