@@ -2,7 +2,7 @@ require_relative 'board'
 require_relative 'piece'
 require_relative 'player'
 
-#TDODO CASTLING, PROMOTION, CHECK STATE, CHECK MATE STATE, SAVING
+#TDODO CASTLING, PROMOTION, CHECK STATE, CHECK MATE STATE, SAVING/exit early/, list help
 class Chess
   PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
   def initialize ()
@@ -64,6 +64,7 @@ class Chess
     loop do 
       puts "Enter two squares: ex: a1b3"
       move = gets.chomp.gsub(' ', '').slice(0,4).downcase
+      # save, exit, help, or move 
       valid_input = /^[a-h][1-9][a-h][1-9]$/.match?(move) 
       succesful_move =  @board.do(move) if valid_input 
       break if succesful_move

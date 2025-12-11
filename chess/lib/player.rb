@@ -14,6 +14,7 @@ class Player
   end
 
   def check_positions() 
+    # get the positions where a King could be checked. Pawn has non-capturing moves, so we exclude those. 
     @pieces.reduce([]) {|moves, piece| moves.concat(piece.moves.filter_map {|m| m[:position] if m[:type] != :move_only})}.uniq
   end
 
