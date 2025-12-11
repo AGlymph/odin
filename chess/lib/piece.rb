@@ -1,7 +1,7 @@
 # movement vector or movement rules module that is read on initilization and saved to the pice. At init get block of movement rules? A piece has a movement vector 
 class Piece
   attr_accessor :current_position
-  attr_reader :visual, :moves, :team, :name
+  attr_reader :visual, :moves, :team, :name, :other_team
   attr_writer :board
 
   def initialize (name, team, visual = nil, board = nil)
@@ -21,10 +21,12 @@ class Piece
       @PAWN_START_ROW = 1
       @PAWN_PROMOTION_ROW = 6
       @DIRECTION = 1
+      @other_team == :black 
     else 
       @PAWN_START_ROW = 6
       @PAWN_PROMOTION_ROW = 1
       @DIRECTION = -1 
+      @other_team == :white
     end
   end
 
@@ -47,7 +49,7 @@ class Piece
       return :hit
     else
       return if type == :capture_only
-      @moves << (@name == 'pawn' && x = @PAWN_PROMOTION_ROW ? {position: end_coordinates, action: :promotion}  : {position: end_coordinates, action: nil})
+      @moves << (@name == 'pawn' && x == @PAWN_PROMOTION_ROW ? {position: end_coordinates, action: :promotion}  : {position: end_coordinates, action: nil})
       return :empty
     end
   end
@@ -114,7 +116,11 @@ class Piece
     [[1,-1],[1,0],[1,1],[0,-1],[0,1],[-1,-1],[-1,0],[-1,1]].each {|delta| check_and_append_move(delta)}
   end
 
-  def update_moves(current_position)
+  def set_king_moves(moves) 
+    @moves = moves if @name == 'king'
+  end
+
+  def update_moves(current_position) # add filter moves? 
     @current_position = current_position
     @moves = []
     send("#{@name.downcase}_moves") 

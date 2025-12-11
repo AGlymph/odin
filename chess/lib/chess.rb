@@ -11,7 +11,6 @@ class Chess
     @current_turn = :white
     load_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b")
     @board.update_all_piece_moves
-
   end
 
   def load_fen(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkqOTHERINFO")
@@ -45,7 +44,12 @@ class Chess
       end
       board_grid << row
     end
-    @board.set_grid_to(board_grid)
+
+    board_grid.each_with_index do |row, coordx|
+      row.each_with_index do |piece, coordy|
+        @board.place(piece, [coordx,coordy])
+      end
+    end
   end
 
   def do_turn(player)
@@ -63,10 +67,13 @@ class Chess
     puts "//LET'S PLAY CHESS!//"
     @board.show
     loop do 
-       do_turn(@players[@current_turn])
-       @board.show
+       #do_turn(@players[@current_turn])
+       # @board.show
        # break if game_over?
-       @board.update_all_piece_moves
+       # @board.update_all_piece_moves
+       # update players
+       # update states 
+       break 
        @current_turn = @current_turn == :white ? :black : :white
     end
     #show_result
