@@ -18,8 +18,16 @@ class Player
     @pieces.reduce([]) {|moves, piece| moves.concat(piece.moves.filter_map {|m| m[:position] if m[:type] != :move_only})}.uniq
   end
 
+  def checked_oponent?() 
+   @pieces.any? { |piece| piece.checked? }
+  end
+
   def update_moves()
     @pieces.each {|piece| piece.update_moves}
+  end
+
+  def rollback
+     @pieces.each {|piece| piece.rollback()}
   end
 
   def update_king_moves(check_positions)

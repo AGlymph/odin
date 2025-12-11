@@ -8,8 +8,9 @@ class Chess
   def initialize ()
     @board = nil
     @players = {white: Player.new(:white), black: Player.new(:black)}
-    @current_turn = :white
-    setup_game("1k7/2ppp3/8/3K4/8/8/8/8 b")
+    @current_team = :white
+    @checked = false
+    setup_game("1k6/8/2P5/3K3R/8/8/8/8 b")
     update_all_moves()
   end
 
@@ -66,9 +67,15 @@ class Chess
       move = gets.chomp.gsub(' ', '').slice(0,4).downcase
       # save, exit, help, or move 
       valid_input = /^[a-h][1-9][a-h][1-9]$/.match?(move) 
-      succesful_move =  @board.do(move) if valid_input 
+      succesful_move =  @board.do(move, player.team) if valid_input 
       break if succesful_move
     end
+  end
+
+  def rollback()
+    @players[:white].rollback
+    @players[:black].rollback
+    @board.rollback
   end
 
 
@@ -76,14 +83,34 @@ class Chess
     puts "//LET'S PLAY CHESS!//"
     @board.show
     loop do 
-       do_turn(@players[@current_turn])
+       p @current_team
+       player = @players[@current_team]
+       p @opponent_team
+       opponent =  @players[@opponent_team]
+       do_turn(player)
        @board.show
        # break if game_over?
        update_all_moves()
+
+        p "checking #{@opponent_team}"
+       if @checked && opponent.checked_oponent?
+        p "rollback"
+        rollback()
+        @board.show
+        next 
+        # rollback one turn keep turn the player the same and do the loop again
+       end
+       @board.show
+       
+       p "checking #{@current_team}"
+       @checked = player.checked_oponent?
+
+
+
        # @board.update_all_piece_moves
        # update players
        # update states 
-       @current_turn = @current_turn == :white ? :black : :white
+       @current_team, @opponent_team = (@current_team == :white ? [:black, :white] : [:white, :black])
     end
     #show_result
   end

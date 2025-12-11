@@ -8,6 +8,7 @@ class Piece
     @team =  team
     @visual = visual
     @moves = []
+    @prev_moves = []
     @current_position = nil 
     @board = board
 
@@ -42,7 +43,7 @@ class Piece
       action = :promotion 
     elsif !target_square.is_a?(Piece) 
       action = nil 
-    elsif target_square.name == 'king'
+    elsif target_square.name == 'king' && target_square.team != @team #TODO Apply to capture and promotions
       action = :check 
     else 
       action = :capture
@@ -120,6 +121,7 @@ class Piece
   end
 
   def update_moves()
+    @prev_moves = @moves
     @moves = []
     send("#{@name.downcase}_moves") 
     return @moves
@@ -128,5 +130,14 @@ class Piece
   def get_move(position)
     move = @moves.select { |move| move[:position] == position }[0]
     move.nil? ? nil : move
+  end
+
+  def checked?
+   @moves.any? {|move| move[:action] == :check}
+  end
+
+  def rollback()
+    @moves = @prev_moves
+    @prev_moves = []
   end
 end

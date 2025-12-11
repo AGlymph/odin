@@ -4,6 +4,7 @@ class Board
     @placeholder = placeholder
     @columns = ['a','b','c','d','e','f','g','h']
     @grid = grid
+    @rollback_move = []
   end
 
   def chess_notation_to_coordinates(position)
@@ -17,18 +18,21 @@ class Board
   end
 =end 
 
-  def do(move_string)
-    start_coordinates = chess_notation_to_coordinates(move_string.slice(0,2))
+  def do(move_string, team)
+    from_coordinates = chess_notation_to_coordinates(move_string.slice(0,2))
     end_coordinates = chess_notation_to_coordinates(move_string.slice(2,2))
-    start_postion = @grid[start_coordinates[0]][start_coordinates[1]]  
+    move_piece = @grid[from_coordinates[0]][from_coordinates[1]]  
     end_position = @grid[end_coordinates[0]][end_coordinates[1]]  
  
-    if start_postion.is_a?(Piece)
-      move = start_postion.get_move(end_coordinates) 
+    if move_piece.is_a?(Piece)
+      return false if move_piece.team != team
+      move = move_piece.get_move(end_coordinates) 
       if !move.nil?
         return false if !end_position.is_a?(Piece) && move[:type] == :capture_only 
-        place(start_postion, end_coordinates)
-        clear(start_coordinates)
+        @rollback_move[0] = [move_piece, from_coordinates]
+        @rollback_move[1] = [end_position, end_coordinates]
+        place(move_piece, end_coordinates)
+        clear(from_coordinates)
         return true 
       else 
         puts "piece can't make that move"
@@ -49,6 +53,12 @@ class Board
   def clear(position)
     position = chess_notation_to_coordinates(position) if position.is_a?(String)
     @grid[position[0]][position[1]] = nil 
+  end
+
+  def rollback
+    #handle promotion?
+    place(@rollback_move[0][0], @rollback_move[0][1])
+    place(@rollback_move[1][0], @rollback_move[1][1])
   end
 
   def get_row_string(index)
