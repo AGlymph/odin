@@ -22,6 +22,10 @@ class Player
    @pieces.any? { |piece| piece.checked? }
   end
 
+  def can_king_move?()
+    @king.moves.empty? 
+  end
+
   def update_moves()
     @pieces.each {|piece| piece.update_moves}
   end

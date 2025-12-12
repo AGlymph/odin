@@ -21,27 +21,18 @@ class Board
   def do(move_string, team)
     from_coordinates = chess_notation_to_coordinates(move_string.slice(0,2))
     end_coordinates = chess_notation_to_coordinates(move_string.slice(2,2))
-    move_piece = @grid[from_coordinates[0]][from_coordinates[1]]  
-    end_position = @grid[end_coordinates[0]][end_coordinates[1]]  
- 
-    if move_piece.is_a?(Piece)
-      return false if move_piece.team != team
-      move = move_piece.get_move(end_coordinates) 
-      if !move.nil?
-        return false if !end_position.is_a?(Piece) && move[:type] == :capture_only 
-        @rollback_move[0] = [move_piece, from_coordinates]
-        @rollback_move[1] = [end_position, end_coordinates]
-        place(move_piece, end_coordinates)
-        clear(from_coordinates)
-        return true 
-      else 
-        puts "piece can't make that move"
-      end
-    else 
-      puts "Square is empty"
-    end
+    from_square = @grid[from_coordinates[0]][from_coordinates[1]]  
+    end_square = @grid[end_coordinates[0]][end_coordinates[1]] 
 
-    return false 
+    if from_square.is_a?(Piece) && from_square.team == team
+      move = from_square.get_move(end_coordinates) 
+      return if move.nil? || (!end_square.is_a?(Piece) && move[:type] == :capture_only)
+      @rollback_move[0] = [from_square, from_coordinates]
+      @rollback_move[1] = [end_square, end_coordinates]
+      place(from_square, end_coordinates)
+      clear(from_coordinates)
+      return move 
+    end
   end
 
   def place(piece, position)
@@ -52,7 +43,9 @@ class Board
 
   def clear(position)
     position = chess_notation_to_coordinates(position) if position.is_a?(String)
-    @grid[position[0]][position[1]] = nil 
+    square = @grid[position[0]][position[1]]
+    square.current_position = nil if square.is_a?(Piece)
+    @grid[position[0]][position[1]]= nil 
   end
 
   def rollback

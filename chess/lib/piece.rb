@@ -36,22 +36,19 @@ class Piece
 
     ex,ey = end_coordinates
     target_square = @board.grid[ex][ey]
-    return if target_square.is_a?(Piece) && type == :move_only
-    # return if !target_square.is_a?(Piece) && type == :capture_only => we need all capturing moves even listed event if the pawn cannot actually make that move for the King to check. 
-
-    if @name == 'pawn' && ex == @PAWN_PROMOTION_ROW 
-      action = :promotion 
-    elsif !target_square.is_a?(Piece) 
-      action = nil 
-    elsif target_square.name == 'king' && target_square.team != @team #TODO Apply to capture and promotions
-      action = :check 
+    # return if !target_square.is_a?(Piece) && type == :capture_only => we need all capturing moves even listed event if the pawn cannot actually make that move for the King to check.
+     
+      # @name == 'pawn' && ex == @PAWN_PROMOTION_ROW 
+      # action = :promotion 
+    if target_square.is_a?(Piece) && target_square.team != @team
+      return if type == :move_only
+      action = (target_square.name == 'king' ? :check : :capture)
+      @moves << {position: end_coordinates, action: action, type: type}
+      return :hit 
     else 
-      action = :capture
+      @moves << {position: end_coordinates, action: nil, type: type}
+      return :empty 
     end
-
-    @moves << {position: end_coordinates, action: action, type: type}
-
-    return (target_square.is_a?(Piece) ? :hit : :empty)
   end
 
   def pawn_moves () 
@@ -123,6 +120,7 @@ class Piece
   def update_moves()
     @prev_moves = @moves
     @moves = []
+    return if @current_position.nil?
     send("#{@name.downcase}_moves") 
     return @moves
   end
@@ -139,5 +137,9 @@ class Piece
   def rollback()
     @moves = @prev_moves
     @prev_moves = []
+  end
+
+  def promote() 
+    
   end
 end

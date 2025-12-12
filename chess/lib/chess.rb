@@ -9,8 +9,10 @@ class Chess
     @board = nil
     @players = {white: Player.new(:white), black: Player.new(:black)}
     @current_team = :white
-    @checked = false
-    setup_game("1k6/8/2P5/3K3R/8/8/8/8 b")
+    @opponent_team = :black
+    @check = false
+    @mate = false 
+    setup_game("1k6/8/1P5/3K3R/8/8/8/1R6 b")
     update_all_moves()
   end
 
@@ -61,21 +63,26 @@ class Chess
   end
 
   def do_turn(player)
-    move = nil 
+    input = nil 
     loop do 
       puts "Enter two squares: ex: a1b3"
-      move = gets.chomp.gsub(' ', '').slice(0,4).downcase
-      # save, exit, help, or move 
-      valid_input = /^[a-h][1-9][a-h][1-9]$/.match?(move) 
-      succesful_move =  @board.do(move, player.team) if valid_input 
-      break if succesful_move
+      input = gets.chomp.gsub(' ', '').slice(0,4).downcase
+      if input == 'save'
+        puts 'saving'
+        return 
+      elsif input == 'exit'
+        puts 'saving and exiting'
+        return  
+      elsif input == 'help'
+        puts 'helping'
+        return  
+      elsif /^[a-h][1-9][a-h][1-9]$/.match?(input) 
+         move = @board.do(input, player.team)
+         return if !move.nil?
+      else
+        puts "Don't understand that..."
+      end
     end
-  end
-
-  def rollback()
-    @players[:white].rollback
-    @players[:black].rollback
-    @board.rollback
   end
 
 
@@ -85,34 +92,26 @@ class Chess
     loop do 
        p @current_team
        player = @players[@current_team]
-       p @opponent_team
        opponent =  @players[@opponent_team]
        do_turn(player)
-       @board.show
-       # break if game_over?
        update_all_moves()
 
-        p "checking #{@opponent_team}"
-       if @checked && opponent.checked_oponent?
-        p "rollback"
+       if @check && opponent.checked_oponent?
         rollback()
-        @board.show
         next 
-        # rollback one turn keep turn the player the same and do the loop again
        end
+
+       # show something? 
        @board.show
+       @check = player.checked_oponent?
+       @mate = opponent.can_king_move? 
+       if @check && @mate
+         puts "CHECK MATE! #{@current_team} won!"
+         break 
+       end
        
-       p "checking #{@current_team}"
-       @checked = player.checked_oponent?
-
-
-
-       # @board.update_all_piece_moves
-       # update players
-       # update states 
        @current_team, @opponent_team = (@current_team == :white ? [:black, :white] : [:white, :black])
     end
-    #show_result
   end
 end
 
