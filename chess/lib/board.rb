@@ -29,16 +29,18 @@ class Board
       return if move.nil? || (!end_square.is_a?(Piece) && move[:type] == :capture_only)
       @rollback_move[0] = [from_square, from_coordinates]
       @rollback_move[1] = [end_square, end_coordinates]
-      place(from_square, end_coordinates)
       clear(from_coordinates)
+      place(from_square, end_coordinates)
       return move 
     end
   end
 
-  def place(piece, position)
+  def place(piece, position, inital_setup = false)
     position = chess_notation_to_coordinates(position) if position.is_a?(String)
     @grid[position[0]][position[1]] = piece
-    piece.current_position = [position[0],position[1]] if piece.is_a?(Piece)
+    return if !piece.is_a?(Piece)
+    piece.current_position = [position[0],position[1]] 
+    piece.has_moved = true if !inital_setup
   end
 
   def clear(position)
@@ -52,6 +54,26 @@ class Board
     #handle promotion?
     place(@rollback_move[0][0], @rollback_move[0][1])
     place(@rollback_move[1][0], @rollback_move[1][1])
+  end
+
+  def can_castle?(player)
+    index = player.team == :white ? 0 : 7
+
+    rook_queen_square = @grid[index][0]
+    rook_queen_ok = rook_queen_square.is_a?(Piece) && rook_queen_square.name == 'rook' && !rook_queen_square.has_moved
+
+    rook_king_square = @grid[index][7] 
+    rook_king_ok = rook_king_square.is_a?(Piece) && rook_king_square.name == 'rook' && !rook_king_square.has_moved
+
+    king = @grid[index][4] 
+    king_ok = king.is_a?(Piece) && king.name == 'king' && !king.has_moved
+
+    empty_queen_side = !@grid[index][1].is_a?(Piece) && !@grid[index][2].is_a?(Piece) && !@grid[index][3].is_a?(Piece)
+    empty_king_side = !@grid[index][5].is_a?(Piece) && !grid[index][6].is_a?(Piece)
+
+    castle_queen_side = rook_queen_ok && king_ok && empty_queen_side
+    caslte_king_side = rook_king_ok && king_ok && empty_king_side
+    return [castle_queen_side, caslte_king_side]
   end
 
   def get_row_string(index)

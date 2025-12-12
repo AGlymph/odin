@@ -2,7 +2,7 @@ require_relative 'board'
 require_relative 'piece'
 require_relative 'player'
 
-#TDODO CASTLING, PROMOTION, CHECK STATE, CHECK MATE STATE, SAVING/exit early/, list help
+#TDODO CASTLING, PROMOTION, SAVING/exit early/, list help
 class Chess
   PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
   def initialize ()
@@ -12,7 +12,7 @@ class Chess
     @opponent_team = :black
     @check = false
     @mate = false 
-    setup_game("1k6/8/1P5/3K3R/8/8/8/1R6 b")
+    setup_game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq")
     update_all_moves()
   end
 
@@ -31,10 +31,15 @@ class Chess
     return piece 
   end
 
-  def setup_game(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkqOTHERINFO")
+  def setup_game(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq")
     fen_arr= fen_string.split(' ')
     row_arr = fen_arr[0].split('/').reverse
-    @current_turn = fen_arr[1] == 'w' ? :white : :black
+    @current_team, @opponent_team = (fen_arr[1] == 'w' ? [:white, :black] : [:black, :white])
+    black_castling = fen_arr[2] 
+    
+    
+
+
     @board = Board.new()
     board_grid = []
     row_arr.each do |r|
@@ -57,7 +62,7 @@ class Chess
 
     board_grid.each_with_index do |row, coordx|
       row.each_with_index do |piece, coordy|
-        @board.place(piece, [coordx,coordy])
+        @board.place(piece, [coordx,coordy], true)
       end
     end
   end
@@ -109,6 +114,8 @@ class Chess
          puts "CHECK MATE! #{@current_team} won!"
          break 
        end
+
+       p @board.can_castle?(player)
        
        @current_team, @opponent_team = (@current_team == :white ? [:black, :white] : [:white, :black])
     end

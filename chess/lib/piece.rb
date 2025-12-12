@@ -1,5 +1,5 @@
 class Piece
-  attr_accessor :current_position
+  attr_accessor :current_position, :has_moved
   attr_reader :visual, :moves, :team, :name, :other_team
   attr_writer :board
 
@@ -9,6 +9,7 @@ class Piece
     @visual = visual
     @moves = []
     @prev_moves = []
+    @has_moved = false
     @current_position = nil 
     @board = board
 
@@ -37,7 +38,7 @@ class Piece
     ex,ey = end_coordinates
     target_square = @board.grid[ex][ey]
     # return if !target_square.is_a?(Piece) && type == :capture_only => we need all capturing moves even listed event if the pawn cannot actually make that move for the King to check.
-     
+    
       # @name == 'pawn' && ex == @PAWN_PROMOTION_ROW 
       # action = :promotion 
     if target_square.is_a?(Piece) && target_square.team != @team
@@ -60,7 +61,6 @@ class Piece
   end
 
   def rook_moves ()
-    #ADD CASTLING?
     (1..7).each do |i| #up 
       move = check_and_append_move([i,0])
       break if move.nil? || move == :hit
