@@ -2,7 +2,7 @@ require_relative 'board'
 require_relative 'piece'
 require_relative 'player'
 
-#TDODO CASTLING, PROMOTION, SAVING/exit early/, list help
+#TDODO SAVING/exit early/, load from fen  list help
 class Chess
   PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
   def initialize ()
@@ -12,7 +12,7 @@ class Chess
     @opponent_team = :black
     @check = false
     @mate = false 
-    setup_game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq")
+    setup_game("r3k2r/1P7/8/8/8/8/PPP1PPPP/R3K2R w KQkq")
     update_all_moves()
   end
 
@@ -21,6 +21,8 @@ class Chess
     @players[:black].update_moves()
     @players[:white].update_king_moves(@players[:black].check_positions)
     @players[:black].update_king_moves(@players[:white].check_positions)
+    @board.set_castle_moves(@players[:white])
+    @board.set_castle_moves(@players[:black])
   end
 
   def spawn_piece(piece_symbol, team)
@@ -37,9 +39,6 @@ class Chess
     @current_team, @opponent_team = (fen_arr[1] == 'w' ? [:white, :black] : [:black, :white])
     black_castling = fen_arr[2] 
     
-    
-
-
     @board = Board.new()
     board_grid = []
     row_arr.each do |r|
@@ -73,13 +72,13 @@ class Chess
       puts "Enter two squares: ex: a1b3"
       input = gets.chomp.gsub(' ', '').slice(0,4).downcase
       if input == 'save'
-        puts 'saving'
         return 
       elsif input == 'exit'
         puts 'saving and exiting'
         return  
       elsif input == 'help'
-        puts 'helping'
+        puts 'type two squares to move like: a1c3'
+        puts 'type exit to save and exit'
         return  
       elsif /^[a-h][1-9][a-h][1-9]$/.match?(input) 
          move = @board.do(input, player.team)
@@ -106,7 +105,7 @@ class Chess
         next 
        end
 
-       # show something? 
+       player.promote_pieces
        @board.show
        @check = player.checked_oponent?
        @mate = opponent.can_king_move? 
@@ -114,8 +113,6 @@ class Chess
          puts "CHECK MATE! #{@current_team} won!"
          break 
        end
-
-       p @board.can_castle?(player)
        
        @current_team, @opponent_team = (@current_team == :white ? [:black, :white] : [:white, :black])
     end

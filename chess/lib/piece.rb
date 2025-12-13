@@ -15,13 +15,15 @@ class Piece
 
     if team == :white
       @PAWN_START_ROW = 1
-      @PAWN_PROMOTION_ROW = 6
+      @PAWN_PROMOTION_ROW = 7
       @DIRECTION = 1
+      @QUEEN_VISUAL = 'Q'
       @other_team == :black 
     else 
       @PAWN_START_ROW = 6
-      @PAWN_PROMOTION_ROW = 1
+      @PAWN_PROMOTION_ROW = 0
       @DIRECTION = -1 
+      @QUEEN_VISUAL = 'q'
       @other_team == :white
     end
   end
@@ -39,8 +41,7 @@ class Piece
     target_square = @board.grid[ex][ey]
     # return if !target_square.is_a?(Piece) && type == :capture_only => we need all capturing moves even listed event if the pawn cannot actually make that move for the King to check.
     
-      # @name == 'pawn' && ex == @PAWN_PROMOTION_ROW 
-      # action = :promotion 
+    return :hit if target_square.is_a?(Piece) && target_square.team == @team
     if target_square.is_a?(Piece) && target_square.team != @team
       return if type == :move_only
       action = (target_square.name == 'king' ? :check : :capture)
@@ -108,8 +109,6 @@ class Piece
   end
 
   def king_moves ()
-    #castling?
-    #when in check
     [[1,-1],[1,0],[1,1],[0,-1],[0,1],[-1,-1],[-1,0],[-1,1]].each {|delta| check_and_append_move(delta)}
   end
 
@@ -130,6 +129,10 @@ class Piece
     move.nil? ? nil : move
   end
 
+  def add_move(end_coordinates, action, type = nil)
+    @moves << {position: end_coordinates, action: action, type: type}
+  end
+
   def checked?
    @moves.any? {|move| move[:action] == :check}
   end
@@ -140,6 +143,11 @@ class Piece
   end
 
   def promote() 
-    
+    return if (@name != 'pawn' || @current_position[0] != @PAWN_PROMOTION_ROW)
+    p "#{@name} + #{@current_position}"
+    p "promoting pawn"
+    @name = 'queen'
+    @visual = @QUEEN_VISUAL
+    update_moves()
   end
 end

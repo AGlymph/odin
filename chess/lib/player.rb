@@ -30,6 +30,10 @@ class Player
     @pieces.each {|piece| piece.update_moves}
   end
 
+  def promote_pieces()
+    @pieces.each {|piece| piece.promote()}
+  end
+
   def rollback
      @pieces.each {|piece| piece.rollback()}
   end

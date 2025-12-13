@@ -29,8 +29,15 @@ class Board
       return if move.nil? || (!end_square.is_a?(Piece) && move[:type] == :capture_only)
       @rollback_move[0] = [from_square, from_coordinates]
       @rollback_move[1] = [end_square, end_coordinates]
-      clear(from_coordinates)
-      place(from_square, end_coordinates)
+      if move[:action] == :castle
+        p "castling"
+        place(from_square, end_coordinates)
+        place(end_square, from_coordinates)
+      else
+        clear(from_coordinates)
+        place(from_square, end_coordinates)
+      end
+      
       return move 
     end
   end
@@ -51,12 +58,11 @@ class Board
   end
 
   def rollback
-    #handle promotion?
     place(@rollback_move[0][0], @rollback_move[0][1])
     place(@rollback_move[1][0], @rollback_move[1][1])
   end
 
-  def can_castle?(player)
+  def set_castle_moves(player)
     index = player.team == :white ? 0 : 7
 
     rook_queen_square = @grid[index][0]
@@ -72,8 +78,19 @@ class Board
     empty_king_side = !@grid[index][5].is_a?(Piece) && !grid[index][6].is_a?(Piece)
 
     castle_queen_side = rook_queen_ok && king_ok && empty_queen_side
-    caslte_king_side = rook_king_ok && king_ok && empty_king_side
-    return [castle_queen_side, caslte_king_side]
+    castle_king_side = rook_king_ok && king_ok && empty_king_side
+
+    if castle_queen_side
+      rook_queen_square.add_move([index,4], :castle)
+      king.add_move([index,0], :castle)
+    end
+
+    if castle_king_side
+      rook_king_square.add_move([index,4],:castle)
+      king.add_move([index,7], :castle)
+    end
+    
+    return [castle_queen_side, castle_king_side]
   end
 
   def get_row_string(index)
