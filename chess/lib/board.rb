@@ -64,33 +64,36 @@ class Board
 
   def set_castle_moves(player)
     index = player.team == :white ? 0 : 7
-
-    rook_queen_square = @grid[index][0]
-    rook_queen_ok = rook_queen_square.is_a?(Piece) && rook_queen_square.name == 'rook' && !rook_queen_square.has_moved
-
-    rook_king_square = @grid[index][7] 
-    rook_king_ok = rook_king_square.is_a?(Piece) && rook_king_square.name == 'rook' && !rook_king_square.has_moved
-
     king = @grid[index][4] 
     king_ok = king.is_a?(Piece) && king.name == 'king' && !king.has_moved
 
-    empty_queen_side = !@grid[index][1].is_a?(Piece) && !@grid[index][2].is_a?(Piece) && !@grid[index][3].is_a?(Piece)
-    empty_king_side = !@grid[index][5].is_a?(Piece) && !grid[index][6].is_a?(Piece)
+    if player.can_castle_queen_side
+      rook_queen_square = @grid[index][0]
+      rook_queen_ok = rook_queen_square.is_a?(Piece) && rook_queen_square.name == 'rook' && !rook_queen_square.has_moved
+      empty_queen_side = !@grid[index][1].is_a?(Piece) && !@grid[index][2].is_a?(Piece) && !@grid[index][3].is_a?(Piece)
+      castle_queen_side = rook_queen_ok && king_ok && empty_queen_side
 
-    castle_queen_side = rook_queen_ok && king_ok && empty_queen_side
-    castle_king_side = rook_king_ok && king_ok && empty_king_side
-
-    if castle_queen_side
-      rook_queen_square.add_move([index,4], :castle)
-      king.add_move([index,0], :castle)
+      if castle_queen_side
+        rook_queen_square.add_move([index,4], :castle)
+        king.add_move([index,0], :castle)
+      else
+        player.can_castle_queen_side = false
+      end   
     end
 
-    if castle_king_side
-      rook_king_square.add_move([index,4],:castle)
-      king.add_move([index,7], :castle)
+    if player.can_castle_king_side
+      rook_king_square = @grid[index][7] 
+      rook_king_ok = rook_king_square.is_a?(Piece) && rook_king_square.name == 'rook' && !rook_king_square.has_moved
+      empty_king_side = !@grid[index][5].is_a?(Piece) && !grid[index][6].is_a?(Piece)
+      castle_king_side = rook_king_ok && king_ok && empty_king_side
+
+      if castle_king_side
+        rook_king_square.add_move([index,4],:castle)
+        king.add_move([index,7], :castle)
+      else 
+        player.can_castle_queen_side = false
+      end
     end
-    
-    return [castle_queen_side, castle_king_side]
   end
 
   def get_row_string(index)

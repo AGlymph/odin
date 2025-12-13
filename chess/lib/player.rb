@@ -1,5 +1,5 @@
 class Player
-  attr_accessor :pieces
+  attr_accessor :pieces, :can_castle_queen_side, :can_castle_king_side
   attr_reader :team
   attr_writer :king
 
@@ -7,6 +7,8 @@ class Player
     @team = team 
     @pieces = []
     @king = nil
+    @can_castle_king_side = false
+    @can_castle_queen_side = false
   end
 
   def moves() 

@@ -2,7 +2,7 @@ require_relative 'board'
 require_relative 'piece'
 require_relative 'player'
 
-#TDODO SAVING/exit early/, load from fen  list help
+#TDODO SAVING/exit early/, load from fen, load or new
 class Chess
   PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
   def initialize ()
@@ -12,7 +12,7 @@ class Chess
     @opponent_team = :black
     @check = false
     @mate = false 
-    setup_game("r3k2r/1P7/8/8/8/8/PPP1PPPP/R3K2R w KQkq")
+    setup_game("r3k2r/1P7/8/8/8/8/PPP1PPPP/R3K2R b Qq")
     update_all_moves()
   end
 
@@ -25,11 +25,12 @@ class Chess
     @board.set_castle_moves(@players[:black])
   end
 
-  def spawn_piece(piece_symbol, team)
+  def spawn_piece(piece_symbol, team, has_moved_cannot_castle = false)
     name = PIECE_NAMES[piece_symbol.downcase]
     piece = Piece.new(name, team, piece_symbol, @board)
     @players[team].pieces << piece
     @players[team].king = piece if name == 'king'
+
     return piece 
   end
 
@@ -37,7 +38,19 @@ class Chess
     fen_arr= fen_string.split(' ')
     row_arr = fen_arr[0].split('/').reverse
     @current_team, @opponent_team = (fen_arr[1] == 'w' ? [:white, :black] : [:black, :white])
-    black_castling = fen_arr[2] 
+    castling = fen_arr[2]
+    castling.each_char do |c|
+      case c 
+        when 'K'
+          @players[:white].can_castle_king_side = true
+        when 'Q'
+          @players[:white].can_castle_queen_side = true
+        when 'k'
+          @players[:black].can_castle_king_side = true
+        when 'q'
+          @players[:black].can_castle_queen_side = true
+      end
+    end
     
     @board = Board.new()
     board_grid = []
@@ -69,7 +82,7 @@ class Chess
   def do_turn(player)
     input = nil 
     loop do 
-      puts "Enter two squares: ex: a1b3"
+      puts "Enter your move:"
       input = gets.chomp.gsub(' ', '').slice(0,4).downcase
       if input == 'save'
         return 
@@ -77,9 +90,8 @@ class Chess
         puts 'saving and exiting'
         return  
       elsif input == 'help'
-        puts 'type two squares to move like: a1c3'
-        puts 'type exit to save and exit'
-        return  
+        puts "type two squares to move: 'a1c3'"
+        puts "type 'exit' to save and exit" 
       elsif /^[a-h][1-9][a-h][1-9]$/.match?(input) 
          move = @board.do(input, player.team)
          return if !move.nil?
