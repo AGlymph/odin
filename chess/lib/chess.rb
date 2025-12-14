@@ -16,11 +16,13 @@ class Chess
     @mate = false 
     save_data = load_game() 
     if save_data.nil? 
-      setup_game("rnbqkbnr/3p4/8/8/4P3/8/8/RNBQKBNR w KQkq")
+      setup_game("rnbqkbnr/3p4/8/8/8/8/8/RNBQKBNR w KQkq e3")
     else 
       setup_game(save_data)
     end
     update_all_moves()
+
+    build_fen_string()
   end
 
   def load_game()
@@ -40,11 +42,15 @@ class Chess
   end
 
   def build_fen_string()
+    7.downto(0) {|i| fen << @board.get_row_string_for_fen(i) << '/'}
+    p fen
+  end
+    
     # get rows
     # get turn counts
     # get current turn
     # get castle 
-  end
+
 
   def update_all_moves()
     @players[:white].update_moves()
@@ -64,7 +70,7 @@ class Chess
     return piece 
   end
 
-  def setup_game(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq")
+  def setup_game(fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3")
     fen_arr= fen_string.split(' ')
     row_arr = fen_arr[0].split('/').reverse
     @current_team, @opponent_team = (fen_arr[1] == 'w' ? [:white, :black] : [:black, :white])
@@ -81,8 +87,8 @@ class Chess
           @players[:black].can_castle_queen_side = true
       end
     end
-    
-    @board = Board.new()
+
+    @board = Board.new()    
     board_grid = []
     row_arr.each do |r|
       row = []
@@ -107,6 +113,9 @@ class Chess
         @board.place(piece, [coordx,coordy], true)
       end
     end
+
+    location_of_en_passant = fen_arr[3]
+    @board.set_en_passant_true_for_piece_at(location_of_en_passant) if location_of_en_passant
   end
 
   def do_turn(player)
@@ -132,6 +141,12 @@ class Chess
         puts "Don't understand that..."
       end
     end
+  end
+
+  def rollback()
+    @players[:white].rollback
+    @players[:black].rollback
+    @board.rollback
   end
 
 

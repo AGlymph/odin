@@ -1,6 +1,6 @@
 class Piece
-  attr_accessor :current_position, :has_moved
-  attr_reader :visual, :moves, :team, :name, :other_team
+  attr_accessor :current_position, :has_moved, :previous_position, :en_passant_capturable
+  attr_reader :visual, :moves, :team, :name, :other_team, :DIRECTION
   attr_writer :board
 
   def initialize (name, team, visual = nil, board = nil)
@@ -11,6 +11,7 @@ class Piece
     @prev_moves = []
     @has_moved = false
     @current_position = nil 
+    @previous_position = nil 
     @board = board
     @en_passant_capturable = false 
 
@@ -29,6 +30,7 @@ class Piece
     end
   end
 
+ 
   def in_bounds?(position)
     position.all? { |coord| coord.between?(0,7)}
   end
@@ -50,13 +52,13 @@ class Piece
       return :hit 
     elsif @name == 'pawn' && !target_square.is_a?(Piece) && type == :capture_only
       en_passant_end_coordiantes = [ex+(-@DIRECTION),ey]
-      p "#{@team}: #{@en_passant_capturable}"
-      p en_passant_end_coordiantes
       epx,epy = en_passant_end_coordiantes
       en_passant_target_square = @board.grid[epx][epy]
       if en_passant_target_square.is_a?(Piece) && en_passant_target_square.en_passant_capturable
-         puts en_passant_target_square
-        @moves << {position: en_passant_end_coordiantes, action: :capture, type: type}
+        puts en_passant_target_square
+        @board.index_to_chess_notation(end_coordinates)
+        @moves << {position: end_coordinates , action: :capture, type: :en_passant}
+        p @moves
       end
       return :empty
     else 
