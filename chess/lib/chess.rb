@@ -2,18 +2,48 @@ require_relative 'board'
 require_relative 'piece'
 require_relative 'player'
 
-#TDODO SAVING/exit early/, load from fen, load or new
+#TDODO SAVING/exit early/, enpassan capture
 class Chess
   PIECE_NAMES = {'r' => 'rook', 'n' => 'knight','b' =>'bishop','q'=>'queen','k'=>'king','p'=> 'pawn'}
+  SAVE_FILE = File.join(File.dirname(__FILE__), 'fen.txt')
   def initialize ()
+    puts "//LET'S PLAY CHESS!//"
     @board = nil
     @players = {white: Player.new(:white), black: Player.new(:black)}
     @current_team = :white
     @opponent_team = :black
     @check = false
     @mate = false 
-    setup_game("r3k2r/1P7/8/8/8/8/PPP1PPPP/R3K2R b Qq")
+    save_data = load_game() 
+    if save_data.nil? 
+      setup_game("rnbqkbnr/3p4/8/8/4P3/8/8/RNBQKBNR w KQkq")
+    else 
+      setup_game(save_data)
+    end
     update_all_moves()
+  end
+
+  def load_game()
+    puts "New(n) or Continue(c)?"
+    input = gets.chomp.to_s.downcase.slice(0)
+    if input == 'c' && File.exist?(SAVE_FILE) then 
+      save_data = File.read(SAVE_FILE)
+      return save_data
+    end
+  end
+
+  def save_game()
+    fen_string = "k7/8/8/8/8/8/8/K7 b Qq"
+    f = File.open(SAVE_FILE, 'w')
+    f.puts fen_string
+    f.close
+  end
+
+  def build_fen_string()
+    # get rows
+    # get turn counts
+    # get current turn
+    # get castle 
   end
 
   def update_all_moves()
@@ -85,13 +115,16 @@ class Chess
       puts "Enter your move:"
       input = gets.chomp.gsub(' ', '').slice(0,4).downcase
       if input == 'save'
-        return 
+        puts 'saving'
+        save_game()
       elsif input == 'exit'
         puts 'saving and exiting'
-        return  
+        save_game()
+        return 0
       elsif input == 'help'
         puts "type two squares to move: 'a1c3'"
         puts "type 'exit' to save and exit" 
+        puts "type 'save' to save and continue playing" 
       elsif /^[a-h][1-9][a-h][1-9]$/.match?(input) 
          move = @board.do(input, player.team)
          return if !move.nil?
@@ -103,13 +136,13 @@ class Chess
 
 
   def play
-    puts "//LET'S PLAY CHESS!//"
     @board.show
     loop do 
        p @current_team
        player = @players[@current_team]
        opponent =  @players[@opponent_team]
-       do_turn(player)
+       status_code = do_turn(player)
+       break if status_code == 0 
        update_all_moves()
 
        if @check && opponent.checked_oponent?
@@ -125,7 +158,6 @@ class Chess
          puts "CHECK MATE! #{@current_team} won!"
          break 
        end
-       
        @current_team, @opponent_team = (@current_team == :white ? [:black, :white] : [:white, :black])
     end
   end

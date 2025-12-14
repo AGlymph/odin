@@ -12,6 +12,7 @@ class Piece
     @has_moved = false
     @current_position = nil 
     @board = board
+    @en_passant_capturable = false 
 
     if team == :white
       @PAWN_START_ROW = 1
@@ -42,11 +43,22 @@ class Piece
     # return if !target_square.is_a?(Piece) && type == :capture_only => we need all capturing moves even listed event if the pawn cannot actually make that move for the King to check.
     
     return :hit if target_square.is_a?(Piece) && target_square.team == @team
-    if target_square.is_a?(Piece) && target_square.team != @team
+    if target_square.is_a?(Piece) && target_square.team != @team 
       return if type == :move_only
       action = (target_square.name == 'king' ? :check : :capture)
       @moves << {position: end_coordinates, action: action, type: type}
       return :hit 
+    elsif @name == 'pawn' && !target_square.is_a?(Piece) && type == :capture_only
+      en_passant_end_coordiantes = [ex+(-@DIRECTION),ey]
+      p "#{@team}: #{@en_passant_capturable}"
+      p en_passant_end_coordiantes
+      epx,epy = en_passant_end_coordiantes
+      en_passant_target_square = @board.grid[epx][epy]
+      if en_passant_target_square.is_a?(Piece) && en_passant_target_square.en_passant_capturable
+         puts en_passant_target_square
+        @moves << {position: en_passant_end_coordiantes, action: :capture, type: type}
+      end
+      return :empty
     else 
       @moves << {position: end_coordinates, action: nil, type: type}
       return :empty 
@@ -54,7 +66,6 @@ class Piece
   end
 
   def pawn_moves () 
-    #ADD PROMOTION
     check_and_append_move([2*@DIRECTION,0], :move_only) if @current_position[0] == @PAWN_START_ROW 
     check_and_append_move([1*@DIRECTION,0], :move_only)
     check_and_append_move([1*@DIRECTION,1], :capture_only)
@@ -117,6 +128,7 @@ class Piece
   end
 
   def update_moves()
+    @en_passant_capturable = false
     @prev_moves = @moves
     @moves = []
     return if @current_position.nil?
