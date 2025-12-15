@@ -16,7 +16,7 @@ class Chess
     @mate = false 
     save_data = load_game() 
     if save_data.nil? 
-      setup_game("rnbqkbnr/3p4/8/8/8/8/8/RNBQKBNR w KQkq e3")
+      setup_game()
     else 
       setup_game(save_data)
     end
@@ -35,23 +35,25 @@ class Chess
   end
 
   def save_game()
-    fen_string = "k7/8/8/8/8/8/8/K7 b Qq"
     f = File.open(SAVE_FILE, 'w')
-    f.puts fen_string
+    f.puts build_fen_string()
     f.close
   end
 
   def build_fen_string()
-    7.downto(0) {|i| fen << @board.get_row_string_for_fen(i) << '/'}
-    p fen
+    fen = ''
+    fen << @board.get_board_string_for_fen()
+    fen << ' '
+    fen << (@current_team == :white ? 'w' : 'b')
+    fen << ' '
+    fen << ( @players[:white].can_castle_king_side ? 'K' : '-' ) 
+    fen << ( @players[:white].can_castle_queen_side ? 'Q' : '-' ) 
+    fen << ( @players[:black].can_castle_king_side ? 'k' : '-' ) 
+    fen << ( @players[:black].can_castle_queen_side ? 'q' : '-' ) 
+    fen << ' '
+    fen << ( @board.en_passant_postion.nil? ? '-' : @board.en_passant_postion )
   end
     
-    # get rows
-    # get turn counts
-    # get current turn
-    # get castle 
-
-
   def update_all_moves()
     @players[:white].update_moves()
     @players[:black].update_moves()
@@ -77,6 +79,8 @@ class Chess
     castling = fen_arr[2]
     castling.each_char do |c|
       case c 
+        when '-'
+          next
         when 'K'
           @players[:white].can_castle_king_side = true
         when 'Q'
@@ -115,7 +119,7 @@ class Chess
     end
 
     location_of_en_passant = fen_arr[3]
-    @board.set_en_passant_true_for_piece_at(location_of_en_passant) if location_of_en_passant
+    @board.set_en_passant_true_for_piece_at(location_of_en_passant) if location_of_en_passant if location_of_en_passant != '-'
   end
 
   def do_turn(player)

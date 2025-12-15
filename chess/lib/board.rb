@@ -1,10 +1,11 @@
 class Board
-  attr_reader :columns, :grid
+  attr_reader :columns, :grid, :en_passant_postion
   def initialize (grid: Array.new(8){Array.new(8){}}, placeholder: ' ')
     @placeholder = placeholder
     @columns = ['a','b','c','d','e','f','g','h']
     @grid = grid
     @rollback_move = []
+    @en_passant_postion = nil
   end
 
   def chess_notation_to_coordinates(position)
@@ -62,7 +63,14 @@ class Board
     xdelta = (position[0] - piece.previous_position[0]).abs if piece.previous_position
     piece.current_position = [position[0],position[1]] 
     piece.has_moved = true if !inital_setup
-    piece.en_passant_capturable = (xdelta == 2 && piece.name =='pawn')
+
+    if xdelta == 2 && piece.name =='pawn'
+      piece.en_passant_capturable 
+      offset = position[0] == 3 ? 1 : -1 
+      @en_passant_position = index_to_chess_notation([position[0]-offset,position[1]])
+    else 
+      @en_passant_position = nil
+    end 
   end
 
   def clear(position)
@@ -84,7 +92,10 @@ class Board
      position = chess_notation_to_coordinates(string) if string.is_a?(String)
      offset = position[0] == 2 ? 1 : -1 
      square = @grid[position[0]+offset][position[1]]
-     square.en_passant_capturable = true if square.is_a?(Piece)
+     if square.is_a?(Piece)
+      square.en_passant_capturable = true 
+      @en_passant_position = string 
+     end
   end
 
   def set_castle_moves(player)
@@ -96,12 +107,11 @@ class Board
       rook_queen_square = @grid[index][0]
       rook_queen_ok = rook_queen_square.is_a?(Piece) && rook_queen_square.name == 'rook' && !rook_queen_square.has_moved
       empty_queen_side = !@grid[index][1].is_a?(Piece) && !@grid[index][2].is_a?(Piece) && !@grid[index][3].is_a?(Piece)
-      castle_queen_side = rook_queen_ok && king_ok && empty_queen_side
 
-      if castle_queen_side
+      if rook_queen_ok && king_ok && empty_queen_side
         rook_queen_square.add_move([index,4], :castle)
         king.add_move([index,0], :castle)
-      else
+      elsif !rook_queen_ok || !king_ok 
         player.can_castle_queen_side = false
       end   
     end
@@ -110,13 +120,12 @@ class Board
       rook_king_square = @grid[index][7] 
       rook_king_ok = rook_king_square.is_a?(Piece) && rook_king_square.name == 'rook' && !rook_king_square.has_moved
       empty_king_side = !@grid[index][5].is_a?(Piece) && !grid[index][6].is_a?(Piece)
-      castle_king_side = rook_king_ok && king_ok && empty_king_side
 
-      if castle_king_side
+      if rook_king_ok && king_ok && empty_king_side
         rook_king_square.add_move([index,4],:castle)
         king.add_move([index,7], :castle)
-      else 
-        player.can_castle_queen_side = false
+      elsif !rook_king_ok || !king_ok
+        player.can_castle_king_side = false
       end
     end
   end
@@ -125,20 +134,23 @@ class Board
     @grid[index].reduce('') {|row_string, piece| row_string << (piece.is_a?(Piece) ? piece.visual : @placeholder) << ' | ' }
   end
 
-  def get_row_string_for_fen(index)
-    row_string = ''
-    current_count = 0
-    @grid[index].each do |square|
-      if square.is_a?(Piece) 
-        row_string << current_count.to_s if current_count > 0
-        row_string << square.visual 
-        current_count = 0
-      else 
-        current_count = current_count + 1
-      end
+  def get_board_string_for_fen()
+    board_string = ''
+    7.downto(0) do |i|
+      current_count = 0
+      @grid[i].each do |square|
+        if square.is_a?(Piece) 
+          board_string << current_count.to_s if current_count > 0
+          board_string << square.visual 
+          current_count = 0
+        else 
+          current_count = current_count + 1
+        end
+      end 
+      board_string << current_count.to_s if current_count > 0
+      board_string << '/' if i != 0
     end 
-    row_string << current_count.to_s if current_count > 0
-    return row_string 
+    return board_string 
   end
 
   def show
