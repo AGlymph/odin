@@ -1,14 +1,27 @@
+@font-face {
+    font-family: "cardo-bold" ;
+    src: url(./assets/Cardo/Cardo-Bold.ttf);
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "cardo-bold";
+}
+
 body{
     display: flex;
+    background-color: rgb(234, 237, 240);
 }
+
 
 .left-section{
-    flex: 1;
+    width: 37%;
+    height: 100vh;
     position: relative;
-}
-
-img{
-    width: 100%;
+    background-image: url(./assets/ferns.jpg);
+    background-size: cover;
+    background-position: center;
 }
 
 .logo-body{
@@ -22,9 +35,57 @@ img{
 }
 
 .right-section{
-    flex: 1.5;
-
+    flex: 1;
+    background-color: #f8f8f8;
     display: flex;
     flex-direction: column;
     justify-content: center;
+
+    --center-value: 80px;
 }
+
+.intro-text p {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: #111;
+    margin-bottom: 16px;
+    padding: 0px var(--center-value);
+    max-width: 600px;
+}
+
+.form-background {
+    background-color: white;
+}
+.form-header {
+    padding: 10px var(--center-value);
+    font-size: 25px;
+}
+
+.form-fields{
+    align-items: center;
+    max-width: 500px;
+    padding: 20px var(--center-value);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 30px;
+    margin-bottom: 20px;
+}
+
+.form-fields > div {
+    flex: 1;
+}
+
+.form-submit {
+    margin: 0px var(--center-value);
+}
+
+.form-submit > button {
+    padding: 10px 50px;
+    margin-bottom: 20px;
+    background-color: #596D48;
+    border-radius: 5px;
+    border-color: #596D48;
+    color: white;
+    font-size: 18px;
+}
+
