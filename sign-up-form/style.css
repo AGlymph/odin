@@ -1,0 +1,30 @@
+body{
+    display: flex;
+}
+
+.left-section{
+    flex: 1;
+    position: relative;
+}
+
+img{
+    width: 100%;
+}
+
+.logo-body{
+    position: absolute;
+    width: 100%;
+    background: black;
+    opacity: 0.6;
+    color: white;
+    top: 8rem;
+    text-align: center;
+}
+
+.right-section{
+    flex: 1.5;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
