@@ -1,4 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
 img {
     height: 50px;
     width: 50px;
 }
+
+body{
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+}
+
+
+.sidebar{
+    grid-row: span 2;
+}
+
+.content{
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+}
+
+.projects{
+   grid-row: span 2;
+}
+
+.projects_container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+}
+
+.trending{
+    grid-column: 2;
+}
+
