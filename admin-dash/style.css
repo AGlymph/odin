@@ -3,7 +3,6 @@
   padding: 0;
   box-sizing: border-box;
   list-style-type: none;
-  font-family: Roboto;
 }
 
 .logo > img {
@@ -85,6 +84,7 @@ body{
     margin-top: 10px;
     gap: 10px;
     color: white;
+
 }
 
 .sidebar > * { 
